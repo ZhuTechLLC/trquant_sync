@@ -48,6 +48,18 @@ if (-not (Test-Path $EnvFile)) {
     Write-Host ""
 }
 
+# 关键：分钟级数据需要本地缓存或允许自动下载
+# 在 live 模式下，bullet-trade 的 MiniQMTProvider 默认 auto_download=False，
+# 会导致部分标的（例如 301005）分钟历史返回空。
+# 这里给出“安全默认值”：若用户未显式设置，则开启自动下载并覆盖市场范围。
+if (-not $env:MINIQMT_AUTO_DOWNLOAD) {
+    $env:MINIQMT_AUTO_DOWNLOAD = "true"
+}
+if (-not $env:MINIQMT_MARKET) {
+    # 覆盖为 A 股常用市场，避免仅 SH 时对 SZ/创业板分钟缓存缺失
+    $env:MINIQMT_MARKET = "SH,SZ"
+}
+
 # 构建命令参数
 $cmdArgs = @(
     "-m", "bullet_trade", "server",
@@ -81,6 +93,8 @@ Write-Host "  日志文件: $LogFile" -ForegroundColor White
 if ($Token) {
     Write-Host "  Token: $Token" -ForegroundColor White
 }
+Write-Host "  MINIQMT_AUTO_DOWNLOAD: $env:MINIQMT_AUTO_DOWNLOAD" -ForegroundColor White
+Write-Host "  MINIQMT_MARKET: $env:MINIQMT_MARKET" -ForegroundColor White
 Write-Host ""
 
 Write-Host "执行命令:" -ForegroundColor Cyan
