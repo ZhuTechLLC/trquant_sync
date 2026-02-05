@@ -54,6 +54,7 @@ def _try_1m_bars(xtdata, symbol: str, period: str, count: int, trade_date: str =
         "count": int(count),
         "trade_date": trade_date or None,
         "rows": 0,
+        "records": [],
         "head": [],
         "tail": [],
         "error": None,
@@ -92,6 +93,15 @@ def _try_1m_bars(xtdata, symbol: str, period: str, count: int, trade_date: str =
         out["rows"] = int(df2.shape[0])
         out["ok"] = out["rows"] > 0
         if out["rows"] > 0:
+            # Keep full records (bounded by count) for downstream analysis on Linux.
+            # Convert index to an explicit time column.
+            try:
+                df_out = df2.copy()
+                df_out = df_out.reset_index().rename(columns={df_out.index.name or "index": "time"})
+                # Some xtdata returns columns like amount; keep all numeric columns.
+                out["records"] = json.loads(df_out.to_json(orient="records", date_format="iso"))
+            except Exception:
+                out["records"] = []
             out["head"] = json.loads(df2.head(5).to_json(orient="records", date_format="iso"))
             out["tail"] = json.loads(df2.tail(5).to_json(orient="records", date_format="iso"))
         return out
