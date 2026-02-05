@@ -1,0 +1,7 @@
+{
+  "id": "20260205_032640_ccf13c7b",
+  "status": "pending",
+  "action": "tail_log",
+  "args": {"path": ".\\qmt_server.log", "lines": "80"},
+  "created_at": "2026-02-05T03:26:40-05:00"
+}
