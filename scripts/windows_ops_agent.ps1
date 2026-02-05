@@ -17,7 +17,7 @@
 #   {
 #     "id": "20260205_123000_abcd",
 #     "status": "pending",
-#     "action": "probe",            // probe | netstat | tail_log | start_server | stop_server | health
+#     "action": "probe",            // probe | netstat | tail_log | start_server | stop_server | health | xtdata_export_intraday
 #     "args": { ... },              // action-specific args
 #     "created_at": "2026-02-05T03:00:00"
 #   }
@@ -192,6 +192,63 @@ function Action-StopServer([hashtable]$args) {
     return @{ ok = $true; killed = $killed }
 }
 
+function Action-XtdataExportIntraday([hashtable]$args) {
+    # Export intraday xtdata bundle (full_tick + 1m bars) into ops/artifacts and return path.
+    $symbol = "301005.SZ"
+    $period = "1m"
+    $count = 260
+    $tradeDate = ""   # YYYY-MM-DD (optional; if empty, use today)
+    $includeFullTick = $true
+
+    if ($args.ContainsKey("symbol")) { $symbol = [string]$args.symbol }
+    if ($args.ContainsKey("period")) { $period = [string]$args.period }
+    if ($args.ContainsKey("count")) { $count = [int]$args.count }
+    if ($args.ContainsKey("trade_date")) { $tradeDate = [string]$args.trade_date }
+    if ($args.ContainsKey("include_full_tick")) { $includeFullTick = [bool]$args.include_full_tick }
+
+    $pythonExe = Join-Path $RepoDir ".\\.venv\\Scripts\\python.exe"
+    if (-not (Test-Path $pythonExe)) {
+        return @{ ok = $false; error = "python_not_found"; path = $pythonExe }
+    }
+
+    $script = Join-Path $RepoDir "scripts\\xtdata_export_intraday.py"
+    if (-not (Test-Path $script)) {
+        return @{ ok = $false; error = "export_script_not_found"; path = $script }
+    }
+
+    $artifactDir = Join-Path $RepoDir "ops\\artifacts"
+    if (-not (Test-Path $artifactDir)) { New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null }
+
+    $ts = Get-Date -Format "yyyyMMdd_HHmmss"
+    $symDigits = ($symbol -replace \"[^0-9]\", \"\")
+    if (-not $symDigits) { $symDigits = \"symbol\" }
+    $artifactPath = Join-Path $artifactDir (\"xtdata_intraday_{0}_{1}.json\" -f $symDigits, $ts)
+
+    $argList = @(
+        $script,
+        \"--symbol\", $symbol,
+        \"--period\", $period,
+        \"--count\", [string]$count,
+        \"--out\", $artifactPath
+    )
+    if ($tradeDate) {
+        $argList += @(\"--trade-date\", $tradeDate)
+    }
+    if (-not $includeFullTick) {
+        $argList += \"--no-full-tick\"
+    }
+
+    try {
+        $proc = Start-Process -FilePath $pythonExe -ArgumentList $argList -WorkingDirectory $RepoDir -NoNewWindow -PassThru -Wait
+        if ($proc.ExitCode -ne 0) {
+            return @{ ok = $false; error = \"export_failed\"; exit_code = $proc.ExitCode; artifact = $artifactPath }
+        }
+        return @{ ok = $true; artifact = $artifactPath; symbol = $symbol; period = $period; count = $count; include_full_tick = $includeFullTick; trade_date = $tradeDate }
+    } catch {
+        return @{ ok = $false; error = \"$($_.Exception.GetType().Name): $($_.Exception.Message)\"; artifact = $artifactPath }
+    }
+}
+
 function Execute-Request([pscustomobject]$req, [string]$reqPath) {
     $id = [string]$req.id
     $action = [string]$req.action
@@ -219,6 +276,7 @@ function Execute-Request([pscustomobject]$req, [string]$reqPath) {
             "health"      { $result.output = Action-Health $args; $result.ok = $true }
             "start_server"{ $result.output = Action-StartServer $args; $result.ok = $true }
             "stop_server" { $result.output = Action-StopServer $args; $result.ok = $true }
+            "xtdata_export_intraday" { $result.output = Action-XtdataExportIntraday $args; $result.ok = $true }
             default       { throw "unsupported_action: $action" }
         }
     } catch {
