@@ -1,0 +1,93 @@
+# Git 协作同步忽略文件
+# 只同步协作相关文件，不同步项目代码
+
+# ==================== 项目代码（不同步） ====================
+core/
+strategies/
+data_sources/
+markets/
+mcp_servers/
+bridge_common/
+ptrade_bridge/
+qmt_bridge/
+quantconnect_bridge/
+dashboard/
+gui/
+extension/
+jqdata/
+shared/
+utils/
+tools/
+models/
+tests/
+notebooks/
+scripts/
+data/
+output/
+logs/
+backtest_results/
+qmt_backtest_results/
+venv/
+.venv/
+venv311/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ==================== 配置文件（不同步敏感信息） ====================
+config/*.json
+!config/*.example.json
+!config/*.json.example
+.env
+.env.local
+*.key
+*.pem
+*.cert
+
+# ==================== 数据文件 ====================
+*.pkl
+*.parquet
+*.csv
+*.log
+*.html
+*.db
+*.sqlite
+
+# ==================== IDE 和系统文件 ====================
+.vscode/
+.idea/
+.cursor/
+.claude/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================== 只同步以下协作文件 ====================
+# 协作脚本
+!scripts/git_sync_windows.ps1
+!scripts/git_sync_ubuntu.sh
+!scripts/start_bullettrade_server.ps1
+
+# 协作文档
+!docs/GIT_COLLABORATION_SETUP.md
+!docs/BULLETTRADE_SERVER_SETUP.md
+!docs/UBUNTU_BULLETTRADE_CLIENT_SETUP.md
+!docs/UBUNTU_QUICK_START.md
+
+# Ubuntu 端脚本和配置
+!docs/ubuntu_bullettrade_quick_start.sh
+!docs/ubuntu_test_connection.py
+!docs/ubuntu_example_strategy.py
+
+# 配置模板
+!config/*.example
+!*.example
+
+# README
+!README.md
+!README_COLLABORATION.md
