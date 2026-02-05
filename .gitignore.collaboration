@@ -1,0 +1,72 @@
+# Git 协作忽略文件
+# 用于中美两台机器协作
+
+# ==================== 敏感信息 ====================
+# 环境配置文件（包含敏感信息，不提交）
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+
+# 账户信息
+config/broker_config.json
+config/*_config.json
+!config/*_config.example.json
+!config/*_config.json.example
+
+# ==================== 日志文件 ====================
+*.log
+logs/
+*.log.*
+
+# ==================== 数据文件 ====================
+data/
+*.pkl
+*.parquet
+*.csv
+!*.example.csv
+
+# ==================== 输出文件 ====================
+output/
+backtest_results/
+*.html
+!*.example.html
+
+# ==================== Python 缓存 ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==================== 虚拟环境 ====================
+venv/
+.venv/
+env/
+ENV/
+.ENV
+
+# ==================== IDE ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==================== 操作系统 ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================== 临时文件 ====================
+*.tmp
+*.temp
+.cache/
+
+# ==================== 但保留模板和示例 ====================
+!*.example
+!*.template
+!config/*.example
+!config/*.template
