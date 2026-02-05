@@ -31,14 +31,29 @@ git remote set-url origin "https://github.com/ZhuTechLLC/trquant_sync.git"
 - **当前**：若在 Linux 上再次执行 `git push`，按上面「1」把 token 设进 URL 再 push 即可。
 - 若不想把 token 写进 URL，可用 Git 凭据存储：`git config credential.helper store`，然后第一次 push 时输入用户名（任意）和 token（当密码），之后会本地保存。
 
-## 3. 两侧开发是否完成
+## 3. Git Sync 流程（先同步再操作）
+
+- **Linux**：入队或查看结果前先同步：
+  ```bash
+  cd /path/to/trquant_sync
+  ./scripts/linux_sync_ops.sh
+  ```
+  会拉取 `origin/windows-server` 并显示 queue/results 数量。
+- **Windows**：运行 Agent 或推送 results 前先拉取：
+  ```powershell
+  cd D:\path\to\trquant_sync
+  .\scripts\git_sync_windows.ps1 -PullOnly
+  # 或直接: git pull origin windows-server
+  ```
+
+## 4. 两侧开发是否完成
 
 | 端 | 状态 | 说明 |
 |----|------|------|
 | **Linux** | ✅ 已完成 | `scripts/linux_enqueue_ops.sh` 可投递 netstat / tail_log / health / start_server / stop_server 等指令；已投递过 netstat、tail_log、health，以及 start_server（见下方）。 |
 | **Windows** | ⏳ 需你本地执行一次 | 脚本和目录已通过 Git 推到 `windows-server` 分支；需在 **Windows 本机** 做一次拉取并运行 Agent。 |
 
-## 4. Windows 端必须执行的一次性步骤
+## 5. Windows 端必须执行的一次性步骤
 
 在 **Windows** 上打开 PowerShell，进入 **trquant_sync** 仓库目录后执行：
 
@@ -66,7 +81,7 @@ git remote set-url origin "https://github.com/ZhuTechLLC/trquant_sync.git"
      ```
    - 之后在 Linux 上 `git pull origin windows-server` 即可看到 `ops/results/` 下的诊断结果。
 
-## 5. 已入队指令与 start_server
+## 6. 已入队指令与 start_server
 
 - 已入队并随上次 push 推送到 `windows-server` 的指令包括：
   - `netstat`（port 58620）
@@ -75,7 +90,7 @@ git remote set-url origin "https://github.com/ZhuTechLLC/trquant_sync.git"
 - 本次会再入队一条 **start_server** 指令：用于在 Windows 上启动 BulletTrade QMT 服务（脚本会调用 `scripts/start_bullettrade_server.ps1`）。  
 - **执行顺序**：Windows 上先拉取再启动 Agent 后，Agent 会按 queue 中文件顺序依次执行；若希望先看诊断再决定是否启动服务，可先只拉取、运行 Agent 处理 netstat/tail_log/health，再在 Linux 上入队 start_server 并 push。
 
-## 6. 当前 Linux 端 push 状态
+## 7. 当前 Linux 端 push 状态
 
 - 最近一次在 Linux 上执行 `./scripts/linux_enqueue_ops.sh start_server` 时，**push 失败**（`fatal: could not read Username for 'https://github.com'`），说明当前环境**未配置 Git 凭据**。
 - **start_server 已在本机入队**，对应文件：`ops/queue/20260205_034030_6f4b941c.json`。
@@ -87,7 +102,7 @@ git remote set-url origin "https://github.com/ZhuTechLLC/trquant_sync.git"
   ```
   即可把 start_server 指令推到远程，Windows 拉取后 Agent 会执行。
 
-## 7. 小结
+## 8. 小结
 
 - **Git Token**：曾用于一次 push，已从 URL 中移除；当前 Linux 上未配置凭据，需按上文「1」配置后再 push。
 - **两侧开发**：Linux 侧 enqueue + push 流程已就绪；Windows 侧需你在本机完成一次 `git pull` 并运行 `windows_ops_agent.ps1`，之后即可通过 Git 机制在 Windows 上执行指令并（可选）把结果推回供 Linux 使用。
