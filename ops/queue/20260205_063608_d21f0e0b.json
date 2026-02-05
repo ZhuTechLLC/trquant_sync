@@ -1,0 +1,7 @@
+{
+  "id": "20260205_063608_d21f0e0b",
+  "status": "pending",
+  "action": "xtdata_export_intraday",
+  "args": {"symbol": "301005.SZ", "period": "1m", "count": "260", "include_full_tick": "true"},
+  "created_at": "2026-02-05T06:36:08-05:00"
+}
