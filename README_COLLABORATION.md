@@ -18,6 +18,7 @@
 - `docs/BULLETTRADE_SERVER_SETUP.md` - BulletTrade Server 启动指南
 - `docs/UBUNTU_BULLETTRADE_CLIENT_SETUP.md` - Ubuntu 客户端配置指南
 - `docs/UBUNTU_QUICK_START.md` - Ubuntu 快速启动指南
+- `docs/GITOPS_WINDOWS_AGENT.md` - **GitOps 远程控制 Windows（自动拉取指令/写回结果）**
 
 ### Ubuntu 端文件
 - `docs/ubuntu_bullettrade_quick_start.sh` - Ubuntu 快速配置脚本

@@ -69,9 +69,12 @@ desktop.ini
 
 # ==================== 只同步以下协作文件 ====================
 # 协作脚本
+!scripts/
 !scripts/git_sync_windows.ps1
 !scripts/git_sync_ubuntu.sh
 !scripts/start_bullettrade_server.ps1
+!scripts/windows_ops_agent.ps1
+!scripts/linux_enqueue_ops.sh
 
 # 协作文档
 !docs/GIT_COLLABORATION_SETUP.md
